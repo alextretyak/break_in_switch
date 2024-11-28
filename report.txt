@@ -1,0 +1,36 @@
+Switches with case without break: 26 / 215
+Times of last case without break: 5
+Times of last default without break: 33
+
+linux\\drivers\\char\\console.c:1050:22
+linux\\drivers\\char\\console.c:1127:4
+linux\\drivers\\char\\console.c:1139:4
+linux\\drivers\\char\\tty_io.c:1598:3        /* fall through */
+linux\\drivers\\char\\tty_ioctl.c:438:4      /* fall through */
+linux\\drivers\\char\\vt.c:182:3             "проваливание" не обязательно, т.к. код последующего case состоит только из break
+linux\\drivers\\scsi\\aha1740.c:90:6
+linux\\drivers\\scsi\\aha1740.c:219:2        ложное срабатывание (код case оканчивается на вызов функции panic(), которая не возвращает управление)
+linux\\drivers\\scsi\\NCR5380.c:1949:3
+linux\\drivers\\scsi\\NCR5380.c:1949:3       дубль (в файле drivers\scsi\pas16.c стоит #include "NCR5380.c")
+linux\\drivers\\scsi\\scsi.c:503:3
+linux\\drivers\\scsi\\scsi.c:510:3
+linux\\drivers\\scsi\\scsi.c:516:3           ложное срабатывание (код case состоит из единственного вызова функции panic(), которая не возвращает управление)
+linux\\drivers\\scsi\\scsi.c:935:3           ложное срабатывание (код case состоит из if (...) return SUGGEST_IS_OK; else return 0;)
+linux\\drivers\\scsi\\scsi.c:1221:3          /* fall through to REDO */
+linux\\drivers\\scsi\\scsi.c:1604:6          "проваливание" не обязательно, т.к. код последующего default состоит только из break
+linux\\drivers\\scsi\\scsi_ioctl.c:111:4     /* Fall through for non-removable media */ (сложный break)
+linux\\drivers\\scsi\\scsi_ioctl.c:116:4     /* Fall through for non-removable media */ (сложный break)
+linux\\drivers\\scsi\\NCR5380.c:1949:3       дубль (в файле drivers\scsi\t128.c стоит #include "NCR5380.c")
+linux\\fs\\buffer.c:404:3                    ложное срабатывание (код case состоит из единственного вызова функции panic(), которая не возвращает управление)
+linux\\ipc\\msg.c:329:2                      ложное срабатывание (код case оканчивается на блок с return в конце)
+linux\\kernel\\printk.c:99:3                 /* FALL THRU */
+linux\\kernel\\signal.c:371:20               /* fall through */
+linux\\kernel\\vsprintf.c:230:3
+linux\\kernel\\vsprintf.c:238:3
+linux\\mm\\mmap.c:61:3                       /* fall through */
+linux\\mm\\swap.c:848:5
+linux\\net\\inet\\sock.c:535:3
+linux\\net\\inet\\tcp.c:382:2                ложное срабатывание (код case оканчивается на if (...) {... return 1;} else {... return 0;})
+linux\\net\\inet\\tcp.c:3237:2
+linux\\net\\inet\\tcp.c:3391:2
+linux\\net\\inet\\tcp.c:3436:4
