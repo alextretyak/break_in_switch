@@ -4,6 +4,8 @@ import pycparser # [https://stackoverflow.com/questions/11143095/parsing-c-code-
 from pycparser import c_ast
 
 
+duffs_device_cases = [] # [https://en.wikipedia.org/wiki/Duff's_device <- http://compiler.su/prodolzhenie-tsikla-i-vykhod-iz-nego.php#55]
+
 class SwitchVisitor(c_ast.NodeVisitor):
     times_of_last_default_without_break = 0
     times_of_last_case_without_break = 0
@@ -20,6 +22,15 @@ class SwitchVisitor(c_ast.NodeVisitor):
 
         for case in node.stmt.block_items:
             assert type(case) in (c_ast.Case, c_ast.Default)
+
+            class CaseVisitor(c_ast.NodeVisitor):
+                def visit_Case(self, node):
+                    duffs_device_cases.append(str(node.coord))
+                    self.generic_visit(node)
+                def visit_Switch(self, node):
+                    pass
+            CaseVisitor().generic_visit(case)
+
             if len(case.stmts):
                 if type(case.stmts[-1]) in (c_ast.Break, c_ast.Continue, c_ast.Return, c_ast.Goto):
                     continue
@@ -87,3 +98,6 @@ if __name__ == "__main__":
     print('Switches with case without break:', v.num_of_switches_with_case_without_break, '/', v.total_num_of_switches)
     print('Times of last case without break:', v.times_of_last_case_without_break)
     print('Times of last default without break:', v.times_of_last_default_without_break)
+
+    print(f"Duff's device cases [{len(duffs_device_cases)}]:")
+    print("\n".join(duffs_device_cases))
