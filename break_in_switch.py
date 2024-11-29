@@ -65,6 +65,47 @@ class SwitchVisitor(c_ast.NodeVisitor):
 if __name__ == "__main__":
     filename = 'all.c'
 
+    if False: # process [https://github.com/mortdeus/legacy-cc <- http://compiler.su/prodolzhenie-tsikla-i-vykhod-iz-nego.php#62]
+        def find_ending_curly_bracket(source, i):
+            assert(source[i] == "{") # }
+            nesting_level = 0
+            while True:
+                if i == len(source):
+                    exit(1)
+                ch = source[i]
+                if ch == '{':
+                    nesting_level += 1
+                elif ch == '}':
+                    nesting_level -= 1
+                    if nesting_level == 0:
+                        return i
+                i += 1
+
+        all = open(filename, 'w')
+        all.write("void f() {\n")
+        for root, dirs, files in os.walk('legacy-cc-master'):
+            for name in files:
+                if name.endswith('.c'):
+                    source = open(os.path.join(root, name)).read()
+                    source = source.replace('=<<', '<<=')
+                    source = source.replace('goto const;', 'goto const_;').replace('const:', 'const_:')
+
+                    # for found in re.finditer(R'\bswitch ?\(.+\) ?\{', source): # } # \
+                    #     endi = find_ending_curly_bracket(source, found.end() - 1)  # - WORKS INCORRECTLY FOR NESTED SWITCHES
+                    #     all.write(source[found.start():endi+1] + "\n")             # /
+
+                    pattern = re.compile(R'\bswitch ?\(.+\) ?\{') # }
+                    pos = 0
+                    while True:
+                        found = pattern.search(source, pos)
+                        if found is None:
+                            break
+                        endi = find_ending_curly_bracket(source, found.end() - 1)
+                        all.write(source[found.start():endi+1] + "\n")
+                        pos = endi
+        all.write("}\n")
+        all.close()
+
     if not os.path.exists(filename):
         all = open(filename, 'w')
         for root, dirs, files in os.walk('linux'):
