@@ -57,7 +57,7 @@ class SwitchVisitor(c_ast.NodeVisitor):
                     else:
                         self.times_of_last_case_without_break += 1
                 else:
-                    print(case.coord)
+                    print(f'{str(case.coord):40}   in #{self.num_of_switches_with_case_without_break:02} {node.coord}')
                     switch_with_case_without_break = True
                     self.num_of_cases_without_break += 1
 
