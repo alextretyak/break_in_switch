@@ -5,6 +5,7 @@ from pycparser import c_ast
 
 
 duffs_device_cases = [] # [https://en.wikipedia.org/wiki/Duff's_device <- http://compiler.su/prodolzhenie-tsikla-i-vykhod-iz-nego.php#55]
+ending_breaks = []
 
 class SwitchVisitor(c_ast.NodeVisitor):
     times_of_last_default_without_break = 0
@@ -12,6 +13,7 @@ class SwitchVisitor(c_ast.NodeVisitor):
     num_of_switches_with_case_without_break = 0
     total_num_of_switches = 0
     num_of_cases_without_break = 0 # точнее, case'ы, в которых используется "проваливание"
+    num_of_ending_breaks = 0 # количество break в switch, которые можно убрать из кода/текста программы при использовании поведения «break по умолчанию»
     total_num_of_cases = 0
 
     def visit_Switch(self, node):
@@ -37,6 +39,9 @@ class SwitchVisitor(c_ast.NodeVisitor):
                 self.total_num_of_cases += 1 # считаем все case'ы, кроме пустых
 
                 if type(case.stmts[-1]) in (c_ast.Break, c_ast.Continue, c_ast.Return, c_ast.Goto):
+                    if type(case.stmts[-1]) == c_ast.Break and case is not node.stmt.block_items[-1]:
+                        self.num_of_ending_breaks += 1
+                        ending_breaks.append(str(case.stmts[-1].coord))
                     continue
 
                 if type(case.stmts[-1]) == c_ast.Switch: # for `case CDROMPAUSE` in sbpcd.c
@@ -86,7 +91,7 @@ if __name__ == "__main__":
                         return i
                 i += 1
 
-        all = open(filename, 'w')
+        all = open('all.c', 'w')
         all.write("void f() {\n")
         for root, dirs, files in os.walk('legacy-cc-master'):
             for name in files:
@@ -144,6 +149,7 @@ if __name__ == "__main__":
     v.visit(ast)
 
     print('Cases without break:', v.num_of_cases_without_break, '/', v.total_num_of_cases)
+    print('Ending breaks:', v.num_of_ending_breaks)
     print()
     print('Switches with case without break:', v.num_of_switches_with_case_without_break, '/', v.total_num_of_switches)
     print('Times of last case without break:', v.times_of_last_case_without_break)
@@ -151,3 +157,6 @@ if __name__ == "__main__":
 
     print(f"Duff's device cases [{len(duffs_device_cases)}]:")
     print("\n".join(duffs_device_cases))
+
+    # print(f"Ending breaks [{len(ending_breaks)}]:")
+    # print("\n".join(ending_breaks))
