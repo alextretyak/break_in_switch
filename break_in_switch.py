@@ -92,6 +92,8 @@ if __name__ == "__main__":
             for name in files:
                 if name.endswith('.c'):
                     source = open(os.path.join(root, name)).read()
+                    source = re.sub(r'/\*[\s\S]*?\*/', '', source) # remove comments (including `/* { */` and `/* } */`)
+                    source = re.sub(r'"[^"\n]*[{}][^"\n]*"', '""', source) # remove contents of string literals with `{` or `}`
                     source = source.replace('=<<', '<<=')
                     source = source.replace('goto const;', 'goto const_;').replace('const:', 'const_:')
 
