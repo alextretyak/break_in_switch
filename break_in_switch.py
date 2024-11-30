@@ -11,6 +11,8 @@ class SwitchVisitor(c_ast.NodeVisitor):
     times_of_last_case_without_break = 0
     num_of_switches_with_case_without_break = 0
     total_num_of_switches = 0
+    num_of_cases_without_break = 0 # точнее, case'ы, в которых используется "проваливание"
+    total_num_of_cases = 0
 
     def visit_Switch(self, node):
         if node.coord.file.endswith('.h'):
@@ -32,6 +34,8 @@ class SwitchVisitor(c_ast.NodeVisitor):
             CaseVisitor().generic_visit(case)
 
             if len(case.stmts):
+                self.total_num_of_cases += 1 # считаем все case'ы, кроме пустых
+
                 if type(case.stmts[-1]) in (c_ast.Break, c_ast.Continue, c_ast.Return, c_ast.Goto):
                     continue
 
@@ -55,6 +59,7 @@ class SwitchVisitor(c_ast.NodeVisitor):
                 else:
                     print(case.coord)
                     switch_with_case_without_break = True
+                    self.num_of_cases_without_break += 1
 
         if switch_with_case_without_break:
             self.num_of_switches_with_case_without_break += 1
@@ -136,6 +141,8 @@ if __name__ == "__main__":
     v = SwitchVisitor()
     v.visit(ast)
 
+    print('Cases without break:', v.num_of_cases_without_break, '/', v.total_num_of_cases)
+    print()
     print('Switches with case without break:', v.num_of_switches_with_case_without_break, '/', v.total_num_of_switches)
     print('Times of last case without break:', v.times_of_last_case_without_break)
     print('Times of last default without break:', v.times_of_last_default_without_break)
